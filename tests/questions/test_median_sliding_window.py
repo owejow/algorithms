@@ -30,3 +30,9 @@ class TestMedianSlidingWindow(object):
         expected = [5,2.5,4]
         median = subject.median_bisect(ary, 4)
         assert median == expected
+    
+    def test_median_heapq(self):
+        ary = [8,2,7,3,1,5]
+        expected = [5,2.5,4]
+        median = subject.median_heapq(ary, 4)
+        assert median == expected

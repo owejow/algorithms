@@ -1,6 +1,7 @@
 import bisect 
+from heapq import heappush, heappop, nsmallest 
 
-__all__ = ['median_brute_force', 'median_bisect']
+__all__ = ['median_brute_force', 'median_bisect', 'median_heapq']
 
 # Median is the middle value in an ordered integer list. If the size of the list is even, 
 # there is no middle value. So the median is the mean of the two middle value.
@@ -32,3 +33,61 @@ def median_bisect(nums, k):
         window.remove(a)
         bisect.insort_right(window, b)
     return medians
+
+
+def median_heapq(nums, k):
+    is_even = (k & 1) == 0
+    medians = []
+    
+    window = sorted(nums[:k])
+    min_queue = []
+    max_queue = []
+
+    for i in range(k//2):
+        heappush(min_queue, window[i])
+
+    for i in range(k//2, k):
+        heappush(max_queue, -window[i])
+
+    target_max = len(max_queue)
+    target_min = len(min_queue)
+
+    valid_max = target_max
+    valid_min = target_min
+
+    invalid_entries = {}
+
+    for a, b in zip(nums, nums[k:] + [0]):
+        medians.append(extract_median_heapq(
+                                      min_queue, 
+                                      max_queue, 
+                                      is_even,
+                                      k
+                                      ) )
+        insert_item_heapq(min_queue, 
+                          max_queue, 
+                          invalid_entries, 
+                          valid_max, 
+                          valid_min, 
+                          is_even)
+
+def extract_median_heapq(min_queue, 
+                         max_queue, 
+                         is_even,
+                         k):
+    if k == 1:
+        median = min_queue[0]
+    else:
+        median = -max_queue[0]
+        if is_even:
+            median += min_queue[0]
+            median /= 2.
+    return median
+
+def insert_item_heapq(min_queue, 
+                      max_queue, 
+                      invalid_entries, 
+                      valid_max, 
+                      valid_min, 
+                      even):
+    pass
