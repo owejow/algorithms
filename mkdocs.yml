@@ -11,14 +11,15 @@ nav:
     - Algorithms: 
         - mit-book: algorithms/mit-book.md
         - python-book: algorithms/python-book.md
+        - python: python.md
     - Deep Learning:
         - pytorch: deep-learning/pytorch.md
         - fastai: deep-learning/fastai.md
     - About: about.md
 markdown_extensions:
+  - footnotes
   - toc:
         permalink: true
-  - footnotes
   - admonition
   - meta
   - codehilite:
