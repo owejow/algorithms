@@ -56,12 +56,7 @@ def extract_median_heaps(max_heap, min_heap, invalid):
         median /= 2.0
     return median
 
-def increment_invalid(num, median, invalid, negate):
-    if median > num:
-        invalid['valid_max'] -= 1
-    else:
-        invalid['valid_min'] -=1
-    
+def increment_invalid(num, invalid, negate):
     if negate:
         num *= -1
 
@@ -74,15 +69,10 @@ def decrement_invalid(num, invalid, negate):
     if is_invalid(num, invalid, negate):
         if negate:
             num *= -1
-            invalid['valid_max'] -= 1
-        else:
-            invalid['valid_min'] -= 1
-
         invalid[num] -= 1
 
         if invalid[num] == 0:
             del[invalid[num]]
-
 
 def pop_invalid_elements(heap, invalid, negate):
     if len(heap) > 0:
@@ -92,12 +82,23 @@ def pop_invalid_elements(heap, invalid, negate):
 
 def transfer_valid(heap_a, heap_b, invalid, first_max):
     heappush(heap_b, -heappop(heap_a))
+    if first_max:
+        invalid['valid_max'] -= 1
+        invalid['valid_min'] += 1
+    else:
+        invalid['valid_min'] -= 1
+        invalid['valid_max'] += 1
+
     pop_invalid_elements(heap_a, invalid, first_max)
     pop_invalid_elements(heap_b, invalid, first_max)
 
 def add_valid_element(heap, entry, invalid, negate):
     pop_invalid_elements(heap, invalid, negate)
     heappush(heap, entry)  
+    if negate:
+        invalid['valid_max'] += 1
+    else:
+        invalid['valid_min'] += 1
     pop_invalid_elements(heap, invalid, negate)
 
 def is_invalid(value, invalid, negate):
@@ -127,6 +128,11 @@ def median_heapq(nums, k):
         medians.append(median)
 
         increment_invalid(a, invalid_entries, median)
+
+        if a < median:
+            invalid_entries['valid_max'] -= 1
+        else: 
+            invalid_entries['valid_min'] -= 1
 
         equal_entries = (invalid_entries['valid_max'] == invalid_entries['valid_min']) 
 

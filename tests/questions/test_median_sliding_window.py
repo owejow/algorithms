@@ -38,15 +38,16 @@ class TestMedianSlidingWindow(object):
         assert median == expected
     
     def test_increment_invalid(self):
-        invalid = {}
-        subject.increment_invalid(10,invalid,False)
-        assert list(invalid.keys()) == [10]
+        invalid = {'valid_min': 0, 'valid_max': 0}
+        subject.increment_invalid(10, invalid,False)
+        expected_keys = ['valid_min', 'valid_max', 10]
         assert invalid[10] == 1
     
     def test_increment_invalid_negates_number_with_negate_true(self):
-        invalid = {}
-        subject.increment_invalid(10,invalid,True)
-        assert list(invalid.keys()) == [-10]
+        invalid = {'valid_min': 0, 'valid_max': 0}
+        expected_keys = ['valid_min', 'valid_max', -10]
+        subject.increment_invalid(10, invalid,True)
+        assert all([item in expected_keys for item in list(invalid.keys())])
         assert invalid[-10] == 1
     
     def test_decrement_invalid_does_nothing_if_key_nonexistent(self):
@@ -67,9 +68,12 @@ class TestMedianSlidingWindow(object):
     
     def test_add_valid_elements(self):
         heap = [1,2,4,5,4,5,5]
-        invalid = {1: 1, 2: 1, 4:1, 5:1}
+        invalid = {1: 1, 2: 1, 4:1, 5:1, 'valid_min': 3, 'valid_max': 4}
         subject.add_valid_element(heap, -3, invalid, negate=False)
         assert heap == [-3, 4, 5, 5, 5]
+        assert invalid[5] == 1
+        assert invalid['valid_min'] == 4
+        assert invalid['valid_max'] == 4
     
     def test_pop_invalid_elements_negate(self):
         heap = [-5, -5, -4, -2, -1]
