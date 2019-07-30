@@ -41,6 +41,12 @@ def median_bisect(nums, k):
     return medians
 
 
+# Utilize lazy removal from heaps to 
+# implement more optimal performance. The performance.
+# in the worst case will be n log(n). In the best case
+# it should be n log(k). in the worst case the invalid
+# values will never be popped from the heap.
+
 def peak(heap, min_heap=True):
     value = None
 
