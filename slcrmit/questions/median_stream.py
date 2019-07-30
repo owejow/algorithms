@@ -59,7 +59,8 @@ def median_stream_heap():
     min_heap = []
     max_heap = []
     
-    num = yield 
+    median = None
+    num = yield median
     
     heappush(max_heap, -num)
 
@@ -72,6 +73,7 @@ def median_stream_heap():
         median = median_heaps(max_heap, min_heap)
         num = yield median
 
+        
         equal_length = (len(max_heap) == len(min_heap))
         
         if num < median:
@@ -84,6 +86,6 @@ def median_stream_heap():
                 transfer_heap_value(min_heap, max_heap)
             heappush(min_heap, num)
 
-def median_streaming_heaps(ary):
+def median_streaming(ary):
     median_coroutine = median_stream_heap()
     return [median_coroutine.send(elem) for elem in ary]

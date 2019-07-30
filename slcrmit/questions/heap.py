@@ -1,7 +1,6 @@
 from heapq import heapify, heappush, heappop
 
 class HeapLazyRemove():
-
     def __init__(self, min_heap=False):
         self._min_heap = min_heap
         self._heap = []

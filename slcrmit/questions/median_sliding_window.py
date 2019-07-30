@@ -40,107 +40,84 @@ def median_bisect(nums, k):
         bisect.insort_right(window, b)
     return medians
 
-def coroutine(func):
-    """Decorator: primes `func` by advancing to first `yield`"""
-    @wraps(func)
-    def primer(*args,**kwargs):
-        gen = func(*args,**kwargs)
-        next(gen)
-        return gen
-    return primer
 
-def extract_median_heaps(max_heap, min_heap, invalid):
-    median = min_heap[0]
-    if invalid['valid_max'] == invalid['valid_min']:
-        median += -max_heap[0]
-        median /= 2.0
+def peak(heap, min_heap=True):
+    value = None
+
+    if min_heap:
+        value = heap[0]
+
+    else:
+        value = -heap[0]
+
+    return value
+
+def median_heaps(max_heap, min_heap, balance):
+    if balance == 0:
+        median = (peak(max_heap, False) + peak(min_heap, True))/2
+
+    elif balance > 0:
+        median = peak(min_heap, True)
+
+    else:
+        median = peak(max_heap, False)
+        
     return median
 
-def increment_invalid(num, invalid, negate):
-    if negate:
-        num *= -1
-
-    if num not in invalid:
-        invalid[num] = 0
-
-    invalid[num] += 1
-
-def decrement_invalid(num, invalid, negate):
-    if is_invalid(num, invalid, negate):
-        if negate:
-            num *= -1
-        invalid[num] -= 1
-
-        if invalid[num] == 0:
-            del[invalid[num]]
-
-def pop_invalid_elements(heap, invalid, negate):
-    if len(heap) > 0:
-        while is_invalid(heap[0], invalid, negate):
-            decrement_invalid(heappop(heap), invalid, negate)      
-
-
-def transfer_valid(heap_a, heap_b, invalid, first_max):
+def transfer_heap_value(heap_a, heap_b, invalid, first_min_heap):
     heappush(heap_b, -heappop(heap_a))
-    if first_max:
-        invalid['valid_max'] -= 1
-        invalid['valid_min'] += 1
-    else:
-        invalid['valid_min'] -= 1
-        invalid['valid_max'] += 1
 
-    pop_invalid_elements(heap_a, invalid, first_max)
-    pop_invalid_elements(heap_b, invalid, first_max)
+    pop_invalid(heap_a, invalid, first_min_heap)
 
-def add_valid_element(heap, entry, invalid, negate):
-    pop_invalid_elements(heap, invalid, negate)
-    heappush(heap, entry)  
-    if negate:
-        invalid['valid_max'] += 1
-    else:
-        invalid['valid_min'] += 1
-    pop_invalid_elements(heap, invalid, negate)
+def pop_invalid(heap, invalid, min_heap):
+    while peak(heap, min_heap):
+        decrement_invalid(heappop(heap), invalid)
 
-def is_invalid(value, invalid, negate):
-    if negate:
-        return -value in invalid.keys()
-    else:
-        return value in invalid.keys()        
+def increment_invalid(value, invalid):
+    if value not in invalid:
+        invalid[value] = 0
+    invalid[value] += 1
 
-def median_heapq(nums, k):
-    is_even = (k & 1) == 0
+def decrement_invalid(value, invalid):
+    invalid[value] -= 1
+
+    if invalid[value] == 0:
+        del invalid[value]
+
+def median_lazy_heap(nums, k):
     medians = []
-    
+    invalid = {}
+
     window = sorted(nums[:k])
-    min_queue = []
-    max_queue = []
 
-    heappush(max_queue, [-a for a in window[0:k//2]])
-    heappush(min_queue, window[k//2:])
+    min_heap = window[:k//2]
+    max_heap = window[k//2:]
 
-    target_max = len(max_queue)
-    target_min = len(min_queue)
+    balance = len(min_heap) - len(max_heap)
 
-    invalid_entries = {'valid_max': target_max, 'valid_min': target_min}
+    for a, b in zip(nums[:k], nums[,:k] + [0]):
 
-    for a, b in zip(nums, nums[k:] + [0]):
-        median = extract_median_heaps(max_heap, min_heap, invalid)
+        median = median_heaps(max_heap, min_heap, balance)
         medians.append(median)
 
-        increment_invalid(a, invalid_entries, median)
+        increment_invalid(a, invalid)        
 
-        if a < median:
-            invalid_entries['valid_max'] -= 1
-        else: 
-            invalid_entries['valid_min'] -= 1
+        if b < median:
+            if balance < 0:
+                transfer_heap_value(max_heap, min_heap, invalid, first_min_heap=False)
+                balance += 1
 
-        equal_entries = (invalid_entries['valid_max'] == invalid_entries['valid_min']) 
-
-        if b >= median:
-            if not equal_entries:
-                transfer_valid(min_heap, max_heap, invalid_entries, first_max=False)
-            add_valid(min_heap, b, invalid_entries, negate=False) 
+            heappush(max_heap, -b)
+            balance -= 1
+            
         else:
-            if equal_entries:
-                transfer_valid(max_heap, min_heap, invalid_entries, first_max=True)
-            add_valid(max_heap, b, invalid_entries, negate=True)
+            if balance > 0:
+                transfer_heap_value(min_heap, max_heap, invalid, first_min_heap=True)
+                balance -= 1
+
+            heappush(min_heap, b)
+            balance +=1
+
+def median_streaming(ary):
+    median_coroutine = median_stream_heap()
+    return [median_coroutine.send(elem) for elem in ary]
