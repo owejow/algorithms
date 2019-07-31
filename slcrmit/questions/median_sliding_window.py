@@ -4,10 +4,7 @@ from heapq import heappush, heappop, nsmallest
 from functools import wraps
 
 __all__ = ['median_brute_force', 
-           'median_bisect', 
-           'median_heapq', 
-           'increment_invalid',
-           'decrement_invalid']
+           'median_bisect']
 
 # Median is the middle value in an ordered integer list. If the size of the list is even, 
 # there is no middle value. So the median is the mean of the two middle value.
@@ -75,9 +72,18 @@ def transfer_heap_value(heap_a, heap_b, invalid, first_min_heap):
 
     pop_invalid(heap_a, invalid, first_min_heap)
 
+def is_invalid(value, valid):
+    result = False
+    if value in valid:
+        result = True
+    return result
+        
 def pop_invalid(heap, invalid, min_heap):
-    while peak(heap, min_heap):
-        decrement_invalid(heappop(heap), invalid)
+    while is_invalid(peak(heap, min_heap), invalid):
+        popped_value = heappop(heap)
+        if not min_heap:
+            popped_value *= -1
+        decrement_invalid(popped_value, invalid)
 
 def increment_invalid(value, invalid):
     if value not in invalid:
@@ -101,7 +107,7 @@ def median_lazy_heap(nums, k):
 
     balance = len(min_heap) - len(max_heap)
 
-    for a, b in zip(nums[:k], nums[,:k] + [0]):
+    for a, b in zip(nums[:k], nums[k:] + [0]):
 
         median = median_heaps(max_heap, min_heap, balance)
         medians.append(median)
@@ -114,6 +120,7 @@ def median_lazy_heap(nums, k):
                 balance += 1
 
             heappush(max_heap, -b)
+            pop_invalid(max_heap, invalid, min_heap=False)
             balance -= 1
             
         else:
@@ -122,8 +129,7 @@ def median_lazy_heap(nums, k):
                 balance -= 1
 
             heappush(min_heap, b)
+            pop_invalid(min_heap, invalid, min_heap=True)
             balance +=1
 
-def median_streaming(ary):
-    median_coroutine = median_stream_heap()
-    return [median_coroutine.send(elem) for elem in ary]
+    return medians

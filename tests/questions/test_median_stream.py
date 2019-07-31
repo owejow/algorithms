@@ -28,5 +28,23 @@ class TestMedianStream(object):
     def test_median_streaming_heaps_empty(self):
         ary = []
         expected = []
-        median = subject.median_streaming_heaps(ary)
+        median = subject.median_streaming(ary)
+        assert median == expected
+    
+    def test_median_streaming_heaps_one_element(self):
+        ary = [1]
+        expected = [1]
+        median = subject.median_streaming(ary)
+        assert median == expected
+    
+    def test_median_streaming_heaps_two_element(self):
+        ary = [1,2]
+        expected = [1,1.5]
+        median = subject.median_streaming(ary)
+        assert median == expected
+    
+    def test_median_streaming_heaps_five_element(self):
+        ary = [8, 8, 1, 8, 0]
+        expected = [8,8,8,8,8]
+        median = subject.median_streaming(ary)
         assert median == expected

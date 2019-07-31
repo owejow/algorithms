@@ -1,4 +1,5 @@
 import slcrmit.questions.median_sliding_window as subject
+from heapq import heapify
 
 class TestMedianSlidingWindow(object):
     def test_median_sliding_window(self):
@@ -31,69 +32,59 @@ class TestMedianSlidingWindow(object):
         median = subject.median_bisect(ary, 4)
         assert median == expected
     
-    def test_median_heapq(self):
-        ary = [8,2,7,3,1,5]
-        expected = [5,2.5,4]
-        median = subject.median_heapq(ary, 4)
-        assert median == expected
+
+    # lasy remove methods
+    def test_peak(self):
+        heap = [1,2,3,4]
+        heapify(heap)
+        assert  1 == subject.peak(heap, min_heap=True)
+        assert -1 == subject.peak(heap, min_heap=False)
+
+    def test_median_heaps(self):
+        min_heap = [ 5, 6,  7, 8]
+        max_heap = [-3, 2, -1, 4]
+        heapify(min_heap)
+        heapify(max_heap)
+        assert 4 == subject.median_heaps(max_heap, min_heap, balance=0)
+        assert 3 == subject.median_heaps(max_heap, min_heap, balance=-1)
+        assert 5 == subject.median_heaps(max_heap, min_heap, balance=1)
     
     def test_increment_invalid(self):
-        invalid = {'valid_min': 0, 'valid_max': 0}
-        subject.increment_invalid(10, invalid,False)
-        expected_keys = ['valid_min', 'valid_max', 10]
-        assert invalid[10] == 1
+        invalid = {1:3}
+        subject.increment_invalid(1, invalid) 
+        assert invalid == {1:4}
+        subject.increment_invalid(5, invalid) 
+        assert invalid == {1:4, 5:1}
     
-    def test_increment_invalid_negates_number_with_negate_true(self):
-        invalid = {'valid_min': 0, 'valid_max': 0}
-        expected_keys = ['valid_min', 'valid_max', -10]
-        subject.increment_invalid(10, invalid,True)
-        assert all([item in expected_keys for item in list(invalid.keys())])
-        assert invalid[-10] == 1
+    def test_decrement_invalid(self):
+        invalid = {1:2}
+        subject.decrement_invalid(1, invalid) 
+        assert invalid == {1:1}
+        subject.decrement_invalid(1, invalid) 
+        assert invalid == {}
     
-    def test_decrement_invalid_does_nothing_if_key_nonexistent(self):
-        invalid = {}
-        subject.decrement_invalid(10,invalid,False)
-        assert list(invalid.keys()) == []
+    def test_is_invalid(self):
+        invalid = {1:2, 3:1}
+        assert subject.is_invalid(1, invalid) 
+        assert not subject.is_invalid(4, invalid) 
+
+    def test_pop_invalid(self):
+        heap = [1,2,3,4,5,6]
+        invalid = {1:1, 2:1, 3:1, 4:1, 5:1}
+        subject.pop_invalid(heap, invalid, min_heap=True)
+        assert heap == [6]
+        assert invalid == {}
     
-    def test_decrement_invalid_removes_key_when_count_is_zero(self):
-        invalid = {10: 1}
-        subject.decrement_invalid(10,invalid,False)
-        assert list(invalid.keys()) == []
-
-    def test_pop_invalid_elements(self):
-        heap = [1,2,4,5,4,5,5]
-        invalid = {1: 1, 2: 1, 4:1, 5:1}
-        subject.pop_invalid_elements(heap, invalid, negate=False)
-        assert heap == [4, 5, 5, 5]
+    def test_pop_invalid_pops_nothing_if_top_valid(self):
+        heap = [1,2,3,4,5,6]
+        invalid = {2:1, 3:1, 4:1, 5:1}
+        subject.pop_invalid(heap, invalid, min_heap=True)
+        assert heap == [1,2,3,4,5,6]
+        assert invalid == {2:1, 3:1, 4:1, 5:1}
     
-    def test_add_valid_elements(self):
-        heap = [1,2,4,5,4,5,5]
-        invalid = {1: 1, 2: 1, 4:1, 5:1, 'valid_min': 3, 'valid_max': 4}
-        subject.add_valid_element(heap, -3, invalid, negate=False)
-        assert heap == [-3, 4, 5, 5, 5]
-        assert invalid[5] == 1
-        assert invalid['valid_min'] == 4
-        assert invalid['valid_max'] == 4
-    
-    def test_pop_invalid_elements_negate(self):
-        heap = [-5, -5, -4, -2, -1]
-        invalid = {2:1, 4:1, 5:2}
-        subject.pop_invalid_elements(heap, invalid, negate=True)
-        assert heap == [-1]
-
-    def test_transfer_valid(self):
-        heap_a = [-5, -2, -4, -1, -1, -1, -1, 0]
-        heap_b = [6, 7, 8, 8, 10]
-
-        invalid = {1:3, 2:1, 4:1, 0:1, 'valid_max':2, 'valid_min':5}
-        
-        expected_b = [5, 7, 6, 8, 10, 8]
-        expected_a = [-1, 0]
-        expected_invalid = {0:1, 'valid_max': 1, 'valid_min':6 }
-
-        subject.transfer_valid(heap_a, heap_b, invalid, first_max=True)
-
-        assert expected_invalid == invalid
-        assert sorted(heap_a) == sorted(expected_a)
-        assert sorted(heap_b) == sorted(expected_b)
-
+    def test_pop_invalid_works_with_max_heap(self):
+        heap = [-1,-2,-3,4,5,6]
+        invalid = {1:1, 2:1, 3:1, 4:1, 5:1}
+        subject.pop_invalid(heap, invalid, min_heap=False)
+        assert heap == [4,5,6]
+        assert invalid == {4:1, 5:1}
