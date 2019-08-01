@@ -88,3 +88,53 @@ class TestMedianSlidingWindow(object):
         subject.pop_invalid(heap, invalid, min_heap=False)
         assert heap == [4,5,6]
         assert invalid == {4:1, 5:1}
+
+    def test_transfer_heap_value_min_heap_all_valid(self):
+
+        invalid = {}
+        min_heap = [6,7,8,9]
+        max_heap = [-5,-4,-3]
+
+        subject.transfer_heap_value(min_heap, max_heap, invalid, first_min_heap=True)
+        assert invalid == {}
+        assert sorted(min_heap) == sorted([7,8,9])
+        assert sorted(max_heap) == sorted([-6,-5,-4,-3])
+    
+    def test_transfer_heap_value_max_heap_all_valid(self):
+
+        invalid = {}
+        min_heap = [6,7,8]
+        max_heap = [-5,-4,-3,-2]
+
+        subject.transfer_heap_value(max_heap, min_heap, invalid, first_min_heap=False)
+        assert invalid == {}
+        assert sorted(min_heap) == sorted([5,6,7,8])
+        assert sorted(max_heap) == sorted([-4,-3,-2])
+    
+    def test_transfer_heap_value_max_heap_with_invalid(self):
+
+        invalid = {4:1, 3:1, 7:1, 8:1}
+        min_heap = [6,7,8]
+        max_heap = [-5,-4,-3,-2]
+
+        subject.transfer_heap_value(max_heap, min_heap, invalid, first_min_heap=False)
+        assert invalid == {7:1, 8:1}
+        assert sorted(min_heap) == sorted([5,6,7,8])
+        assert sorted(max_heap) == sorted([-2])
+
+    def test_transfer_heap_value_min_heap_with_invalid(self):
+
+        invalid = {4:1, 3:1, 7:1, 8:1}
+        min_heap = [6,7,8,9]
+        max_heap = [-5,-4,-3,-2]
+
+        subject.transfer_heap_value(min_heap, max_heap, invalid, first_min_heap=True)
+        assert invalid == {3:1, 4:1}
+        assert sorted(min_heap) == sorted([9])
+        assert sorted(max_heap) == sorted([-6,-5,-4,-3,-2])
+
+    def test_median_lazy_heap(self):
+       input = [2, 5, 6, 3, 3, 9, 8, 4, 0, 2] 
+
+       medians = subject.median_lazy_heap(input, 3)
+       20
