@@ -109,32 +109,49 @@ def median_lazy_heap(nums, k):
     for a, b in zip(nums, nums[k:] + [0]):
         median = median_heaps(max_heap, min_heap, balance)
         medians.append(median)
-
+        
         increment_invalid(a, invalid)        
 
-        if a < median or ((balance < 0) and (a == median)) :
+        if a == median:
+            if balance < 0:
+                pop_invalid(max_heap, invalid, min_heap=False)
+                balance += 1
+            else:
+                pop_invalid(min_heap, invalid, min_heap=True)
+                balance -= 1
+
+        elif a < median:
             pop_invalid(max_heap, invalid, min_heap=False)
             balance += 1
+
         else:
             pop_invalid(min_heap, invalid, min_heap=True)
             balance -= 1
 
-        if b < median:
+        if b == median:
+            if balance < 0:
+                heappush(min_heap, b)
+                balance += 1
+            else:
+                heappush(max_heap, -b)
+                balance -= 1
+
+        elif b < median:
             if balance < 0:
                 transfer_heap_value(max_heap, min_heap, invalid, first_min_heap=False)
                 balance += 2
 
             heappush(max_heap, -b)
-            pop_invalid(max_heap, invalid, min_heap=False)
             balance -= 1
             
         else:
             if balance > 0:
                 transfer_heap_value(min_heap, max_heap, invalid, first_min_heap=True)
                 balance -= 2
-
             heappush(min_heap, b)
-            pop_invalid(min_heap, invalid, min_heap=True)
             balance +=1
+        
+        pop_invalid(min_heap, invalid, min_heap=True)
+        pop_invalid(max_heap, invalid, min_heap=False)
 
     return medians

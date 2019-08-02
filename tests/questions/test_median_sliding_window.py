@@ -137,4 +137,17 @@ class TestMedianSlidingWindow(object):
        input = [2, 5, 6, 3, 3, 9, 8, 4, 0, 2] 
 
        medians = subject.median_lazy_heap(input, 3)
-       20
+       assert medians == [5, 5, 3, 3, 8, 8, 4, 2]
+    
+    def test_median_lazy_heap_window_1(self):
+       input = [2, 5, 6, 3, 3, 9, 8, 4, 0, 2] 
+
+       medians = subject.median_lazy_heap(input, 1)
+       assert medians == [2, 5, 6, 3, 3, 9, 8, 4, 0, 2] 
+    
+    def test_median_lazy_heap_window_two(self):
+       input = [2, 5, 6, 3, 3, 9, 8, 4, 0, 2] 
+
+       medians = subject.median_lazy_heap(input, 2)
+       assert medians == [3.5, 5.5, 4.5, 3, 6, 8.5, 6, 2, 1] 
+       
