@@ -4,7 +4,8 @@ from heapq import heappush, heappop, nsmallest
 from functools import wraps
 
 __all__ = ['median_brute_force', 
-           'median_bisect']
+           'median_bisect',
+           'median_lazy_heap']
 
 # Median is the middle value in an ordered integer list. If the size of the list is even, 
 # there is no middle value. So the median is the mean of the two middle value.
